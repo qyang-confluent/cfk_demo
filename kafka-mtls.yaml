@@ -1,0 +1,80 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: Zookeeper
+metadata:
+  name: zookeeper
+  namespace: qyang
+spec:
+  replicas: 3
+  image:
+    application: confluentinc/cp-zookeeper:7.2.0
+    init: confluentinc/confluent-init-container:2.4.0
+  dataVolumeCapacity: 10Gi
+  logVolumeCapacity: 10Gi
+  authentication:
+    type: mtls
+    principalMappingRules:
+      - RULE:.*CN[\s]?=[\s]?([a-zA-Z0-9.]*)?.*/$1/
+  tls:
+    secretRef: tls-zookeeper
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Kafka
+metadata:
+  name: kafka
+  namespace: qyang
+spec:
+  replicas: 3
+  image:
+    application: confluentinc/cp-server:7.2.0
+    init: confluentinc/confluent-init-container:2.4.0
+  dataVolumeCapacity: 10Gi
+  tls:
+    secretRef: tls-kafka
+  listeners:
+    internal:
+      authentication:
+        type: mtls
+        principalMappingRules:
+          - RULE:.*CN[\s]?=[\s]?([a-zA-Z0-9.]*)?.*/$1/
+      tls:
+        enabled: true
+    external:
+      authentication:
+        type: mtls
+        principalMappingRules:
+          - RULE:.*CN[\s]?=[\s]?([a-zA-Z0-9.]*)?.*/$1/
+      tls:
+        enabled: true
+  metricReporter:
+    enabled: true
+    authentication:
+      type: mtls
+    tls:
+      enabled: true
+  dependencies:
+    zookeeper:
+      endpoint: zookeeper.qyang.svc.cluster.local:2182
+      authentication:
+        type: mtls
+      tls:
+        enabled: true
+
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: SchemaRegistry
+metadata:
+  name: schemaregistry
+  namespace: qyang
+spec:
+  replicas: 1
+  image:
+    application: confluentinc/cp-schema-registry:7.2.0
+    init: confluentinc/confluent-init-container:2.4.0
+  dependencies:
+    kafka:
+      bootstrapEndpoint: kafka.qyang.svc.cluster.local:9071
+      authentication:
+        type: mtls
+      tls:
+        enabled: true
+        secretRef: tls-schemaregistry
