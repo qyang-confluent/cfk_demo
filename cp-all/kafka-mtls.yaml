@@ -23,7 +23,7 @@ metadata:
   name: kafka
   namespace: qyang
 spec:
-  replicas: 3
+  replicas: 4
   image:
     application: confluentinc/cp-server:7.2.0
     init: confluentinc/confluent-init-container:2.4.0
