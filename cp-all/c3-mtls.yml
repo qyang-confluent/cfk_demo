@@ -1,0 +1,35 @@
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: ControlCenter
+metadata:
+  name: controlcenter
+  namespace: qyang
+spec:
+  replicas: 1
+  image:
+    application: confluentinc/cp-enterprise-control-center:7.1.0
+    init: confluentinc/confluent-init-container:2.3.0
+  dataVolumeCapacity: 10Gi
+  externalAccess:
+    type: loadBalancer
+    loadBalancer:
+      domain: qyang.confluent
+  configOverrides:
+    server:
+      - confluent.metrics.topic.max.message.bytes=8388608  
+      - 1confluent.controlcenter.mode.enable=management
+      - 1confluent.controlcenter.ksql.ksqldb.advertised.url=http://afa3157c8bd3949aeb89df9d7453d199-d94f05b0d3e7ab89.elb.us-east-1.amazonaws.com:80
+      - 1confluent.controlcenter.rest.ssl.truststore.password=mystorepassword
+  dependencies:
+    kafka:
+      bootstrapEndpoint: kafka.qyang.svc.cluster.local:9071
+      authentication:
+        type: mtls
+      tls:
+        enabled: true
+        secretRef: tls-controlcenter
+    ksqldb:
+      - name: ksqldb
+        url:  http://ksqldb.qyang.svc.cluster.local:8088
+    schemaRegistry:
+      url: http://schemaregistry.qyang.svc.cluster.local:8081
