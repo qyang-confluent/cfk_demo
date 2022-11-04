@@ -1,0 +1,10 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: KafkaRestClass
+metadata:
+  name: default
+spec:
+  kafkaClusterRef:
+    name: kafka
+    namespace: qyang
+  kafkaRest:
+    endpoint: http://kafka.qyang.svc.cluster.local:8090
