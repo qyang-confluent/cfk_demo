@@ -23,7 +23,7 @@ metadata:
   name: kafka
   namespace: qyang
 spec:
-  replicas: 6
+  replicas: 4
   rackAssignment:
     nodeLabels:
     - topology.kubernetes.io/zone
