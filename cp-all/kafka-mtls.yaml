@@ -23,7 +23,13 @@ metadata:
   name: kafka
   namespace: qyang
 spec:
-  replicas: 3
+  replicas: 4
+  rackAssignment:
+    nodeLabels:
+    - topology.kubernetes.io/zone
+  podTemplate:
+    serviceAccountName: kafka
+  oneReplicaPerNode: true
   image:
     application: confluentinc/cp-server:7.2.0
     init: confluentinc/confluent-init-container:2.4.0
