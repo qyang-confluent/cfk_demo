@@ -35,7 +35,7 @@ spec:
   image:
     application: confluentinc/cp-server:7.2.0
     init: confluentinc/confluent-init-container:2.4.0
-  dataVolumeCapacity: 15Gi
+  dataVolumeCapacity: 16Gi
   storageClass:
     name: kafka-storage-class
   tls:

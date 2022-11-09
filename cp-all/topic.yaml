@@ -20,7 +20,7 @@ metadata:
 spec:
   partitionCount: 1
   configs:
-    "cleanup.policy": "compact"
+    "cleanup.policy": "delete"
     "confluent.placement.constraints": "{ \"version\": 2, \"replicas\": [ {\r\n            \"count\": 2,\r\n            \"constraints\": {\r\n                \"rack\": \"us-east-1b\"\r\n            }\r\n        },\r\n        {\r\n          \"count\": 1,\r\n          \"constraints\": {\r\n              \"rack\": \"us-east-1c\"\r\n          }\r\n      }\r\n    ],\r\n    \"observerPromotionPolicy\":\"under-min-isr\"\r\n}"
   kafkaClusterRef:
     name: kafka
