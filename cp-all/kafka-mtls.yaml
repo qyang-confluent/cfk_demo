@@ -10,6 +10,8 @@ spec:
     init: confluentinc/confluent-init-container:2.4.0
   dataVolumeCapacity: 5Gi
   logVolumeCapacity: 10Gi
+  storageClass:
+    name: kafka-storage-class
   authentication:
     type: mtls
     principalMappingRules:
@@ -34,6 +36,8 @@ spec:
     application: confluentinc/cp-server:7.2.0
     init: confluentinc/confluent-init-container:2.4.0
   dataVolumeCapacity: 15Gi
+  storageClass:
+    name: kafka-storage-class
   tls:
     secretRef: tls-kafka
   listeners:
