@@ -15,7 +15,6 @@ spec:
                 operator: In
                 values:
                 - kafka
-                - zookeeper
             topologyKey: "kubernetes.io/hostname"
   image:
     application: confluentinc/cp-zookeeper:7.2.0
