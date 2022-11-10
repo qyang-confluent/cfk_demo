@@ -5,7 +5,18 @@ metadata:
   namespace: qyang
 spec:
   replicas: 3
-  oneReplicaPerNode: true
+  podTemplate:
+    affinity:
+      podAntiAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - kafka
+                - zookeeper
+            topologyKey: "kubernetes.io/hostname"
   image:
     application: confluentinc/cp-zookeeper:7.2.0
     init: confluentinc/confluent-init-container:2.4.0
