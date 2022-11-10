@@ -5,6 +5,7 @@ metadata:
   namespace: qyang
 spec:
   replicas: 3
+  oneReplicaPerNode: true
   image:
     application: confluentinc/cp-zookeeper:7.2.0
     init: confluentinc/confluent-init-container:2.4.0
