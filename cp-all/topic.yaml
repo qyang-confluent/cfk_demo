@@ -32,6 +32,8 @@ kind: KafkaTopic
 metadata:
   name: orders
   namespace: qyang
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
 spec:
   replicas: 3
   partitionCount: 1
