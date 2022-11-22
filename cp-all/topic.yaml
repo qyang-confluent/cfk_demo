@@ -2,6 +2,8 @@
 apiVersion: platform.confluent.io/v1beta1
 kind: KafkaTopic
 metadata:
+  finalizers:
+  - kafkatopic.finalizers.platform.confluent.io
   name: mrc-topic
   namespace: qyang
 spec:
@@ -12,6 +14,20 @@ spec:
   kafkaClusterRef:
     name: kafka
     namespace: qyang
+  kafkaRestClassRef:
+    name: kafka-rest
+    namespace: qyang
+---
+
+apiVersion: platform.confluent.io/v1beta1
+kind: KafkaTopic
+metadata:
+  finalizers:
+  - kafkatopic.finalizers.platform.confluent.io
+  name: pageviews
+  namespace: qyang
+spec:
+  partitionCount: 1
   kafkaRestClassRef:
     name: kafka-rest
     namespace: qyang
