@@ -28,3 +28,6 @@ spec:
     name: kafka
     namespace: qyang
 
+  kafkaRestClassRef:
+    name: kafka-rest
+    namespace: qyang
