@@ -12,22 +12,7 @@ spec:
   kafkaClusterRef:
     name: kafka
     namespace: qyang
-
----
-apiVersion: platform.confluent.io/v1beta1
-kind: KafkaTopic
-metadata:
-  name: pageviews
-  namespace: qyang
-  finalizers:
-    - resources-finalizer.argocd.argoproj.io
-spec:
-  replicas: 3
-  partitionCount: 1
-  kafkaClusterRef:
-    name: kafka
-    namespace: qyang
-
   kafkaRestClassRef:
     name: kafka-rest
     namespace: qyang
+
