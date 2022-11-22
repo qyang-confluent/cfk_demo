@@ -31,4 +31,17 @@ spec:
   kafkaRestClassRef:
     name: kafka-rest
     namespace: qyang
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: KafkaTopic
+metadata:
+  finalizers:
+  - kafkatopic.finalizers.platform.confluent.io
+  name: orders
+  namespace: qyang
+spec:
+  partitionCount: 1
+  kafkaRestClassRef:
+    name: kafka-rest
+    namespace: qyang
 
