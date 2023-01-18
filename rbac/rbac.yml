@@ -1,0 +1,201 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: ControlCenter
+metadata:
+  name: controlcenter
+  namespace: qyang
+spec:
+  replicas: 1
+  podTemplate:
+    probe:
+      liveness:
+        periodSeconds: 10
+        failureThreshold: 5
+        timeoutSeconds: 500
+  image:
+    application: confluentinc/cp-enterprise-control-center:7.3.0
+    init: confluentinc/confluent-init-container:2.5.0
+  dataVolumeCapacity: 10Gi
+  externalAccess:
+    type: loadBalancer
+    loadBalancer:
+      domain: confluent.qiyang.us
+  configOverrides:
+    server:
+      - confluent.metrics.topic.max.message.bytes=8388608
+      #- confluent.controlcenter.mode.enable=management
+  authorization:
+    type: rbac
+  tls:
+    secretRef: tls-controlcenter
+  dependencies:
+    kafka:
+      bootstrapEndpoint: kafka.qyang.svc.cluster.local:9071
+      authentication:
+        type: mtls
+      tls:
+        enabled: true
+    mds:
+      endpoint: https://kafka.qyang.svc.cluster.local:8090
+      tokenKeyPair:
+        secretRef: mds-token
+      authentication:
+        type: bearer
+        bearer:
+          secretRef: mds-client
+      tls:
+        enabled: true
+    schemaRegistry:
+      url: https://sr.qyang.svc.cluster.local:8081
+      tls:
+        enabled: true
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: SchemaRegistry
+metadata:
+  name: sr
+  namespace: qyang
+spec:
+  replicas: 1
+  image:
+    application: confluentinc/cp-schema-registry:7.3.0
+    init: confluentinc/confluent-init-container:2.5.0
+  tls:
+    secretRef: tls-schemaregistry
+  authorization:
+    type: rbac
+  dependencies:
+    kafka:
+      bootstrapEndpoint: kafka.qyang.svc.cluster.local:9071
+      authentication:
+        type: mtls
+      tls:
+        enabled: true
+    mds:
+      endpoint: https://kafka.qyang.svc.cluster.local:8090
+      tokenKeyPair:
+        secretRef: mds-token
+      authentication:
+        type: bearer
+        bearer:
+          secretRef: mds-client
+      tls:
+        enabled: true
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Zookeeper
+metadata:
+  name: zookeeper
+  namespace: qyang
+spec:
+  replicas: 3
+  image:
+    application: confluentinc/cp-zookeeper:7.3.0
+    init: confluentinc/confluent-init-container:2.5.0
+  dataVolumeCapacity: 5Gi
+  logVolumeCapacity: 10Gi
+  storageClass:
+    name: kafka-storage-class
+  authentication:
+    type: mtls
+    principalMappingRules:
+      - RULE:.*CN[\s]?=[\s]?([a-zA-Z0-9.]*)?.*/$1/
+  tls:
+    secretRef: tls-zookeeper
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Kafka
+metadata:
+  name: kafka
+  namespace: qyang
+spec:
+  replicas: 3
+
+  podTemplate:
+    serviceAccountName: kafka
+  image:
+    application: confluentinc/cp-server:7.3.0
+    init: confluentinc/confluent-init-container:2.5.0
+  dataVolumeCapacity: 16Gi
+  storageClass:
+    name: kafka-storage-class
+  tls:
+    secretRef: tls-kafka
+  listeners:
+    internal:
+      authentication:
+        type: mtls
+        principalMappingRules:
+          - RULE:.*CN[\s]?=[\s]?([a-zA-Z0-9.]*)?.*/$1/
+      tls:
+        enabled: true
+    external:
+      authentication:
+        type: mtls
+        principalMappingRules:
+          - RULE:.*CN[\s]?=[\s]?([a-zA-Z0-9.]*)?.*/$1/
+      tls:
+        enabled: true
+  metricReporter:
+    enabled: true
+    authentication:
+      type: mtls
+    tls:
+      enabled: true
+  authorization:
+    type: rbac
+    superUsers:
+    - User:kafka
+    - User:alice
+  services:
+    mds:
+      # Configure this with TLS encryption, but not with external access through a load balancer.
+      # For external access to MDS, an ingress controller can be used.
+      tls:
+        enabled: true
+      tokenKeyPair: 
+        secretRef: mds-token
+      provider:
+        type: ldap
+        ldap:
+          address: ldap://ldap.qyang.svc.cluster.local:389
+          authentication:
+            type: simple
+            simple:
+              secretRef: ldap-users
+          configurations:
+            groupSearchBase: ou=groups,dc=confluentdemo,dc=com
+            groupSearchFilter: (cn=c3users)
+            groupNameAttribute: cn
+            groupObjectClass: posixGroup
+            groupMemberAttribute: memberUid
+            groupMemberAttributePattern: cn=(.*),ou=users,dc=confluentdemo,dc=com
+            userNameAttribute: cn
+            userMemberOfAttributePattern: cn=(.*),ou=users,dc=confluentdemo,dc=com
+            userObjectClass: inetOrgPerson
+            userSearchBase: ou=users,dc=confluentdemo,dc=com
+  dependencies:
+    kafkaRest:
+      authentication:
+        type: bearer
+        bearer:
+          secretRef: mds-client
+    zookeeper:
+      endpoint: zookeeper.qyang.svc.cluster.local:2182
+      authentication:
+        type: mtls
+      tls:
+        enabled: true
+
+---
+
+apiVersion: platform.confluent.io/v1beta1
+kind: KafkaRestClass
+metadata:
+  name: default
+  namespace: qyang
+spec:
+  kafkaRest:
+    authentication:
+      type: bearer
+      bearer:
+        secretRef: rest-users

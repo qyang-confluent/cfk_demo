@@ -1,0 +1,11 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: KafkaRestClass
+metadata:
+  name: default
+  namespace: qyang
+spec:
+  kafkaRest:
+    authentication:
+      type: bearer
+      bearer:
+        secretRef: rest-users
