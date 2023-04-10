@@ -1,0 +1,35 @@
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: KsqlDB
+metadata:
+  name: ksql-demo
+  namespace: qyang
+spec:
+  replicas: 2
+  image:
+    application: confluentinc/cp-ksqldb-server:7.1.0
+    init: confluentinc/confluent-init-container:2.3.0
+  dataVolumeCapacity: 10Gi
+  configOverrides:
+    server:
+    - ksql.internal.topic.replicas=3
+    - ksql.query.pull.enable.standby.reads=true
+    - ksql.heartbeat.enable=true
+    - ksql.lag.reporting.enable=true
+    - ksql.logging.processing.topic.replication.factor=3  
+  dependencies:
+    kafka:
+      bootstrapEndpoint: bootstrap.aws.confluent.cloud:9092
+      authentication:
+        type: plain
+        jaasConfig:
+          secretRef: cluster-demo-credentials
+      tls:
+        enabled: true
+        ignoreTrustStoreConfig: true
+    schemaRegistry:
+      url: https://sr.confluent.cloud
+      authentication:
+        type: basic
+        basic:
+          secretRef: ccloud-sr-credentials
